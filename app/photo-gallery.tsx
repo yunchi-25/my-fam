@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { SignInButton, useUser } from "@clerk/react";
 
 type Photo = {
   id: string;
@@ -13,18 +13,50 @@ type Photo = {
 const MAX_FILE_SIZE = 2.5 * 1024 * 1024;
 
 export default function PhotoGallery() {
-  const { user } = useUser();
+  const { isLoaded, isSignedIn, user } = useUser();
 
-  if (!user) {
-    return null;
+  if (!isLoaded) {
+    return (
+      <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#f7f4ee] px-6 text-stone-950">
+        <p className="text-sm font-semibold text-stone-600">
+          갤러리를 준비하고 있습니다.
+        </p>
+      </main>
+    );
+  }
+
+  if (!isSignedIn || !user) {
+    return (
+      <main className="min-h-[calc(100vh-4rem)] bg-[#f7f4ee] text-stone-950">
+        <section className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-5xl flex-col items-center justify-center px-6 py-16 text-center">
+          <p className="mb-4 text-sm font-semibold text-rose-700">
+            가족 사진은 로그인 후에만 볼 수 있어요
+          </p>
+          <h1 className="max-w-2xl text-4xl font-bold tracking-normal sm:text-5xl">
+            나의 가족 이야기
+          </h1>
+          <p className="mt-5 max-w-xl text-base leading-7 text-stone-700 sm:text-lg">
+            소중한 사진과 그날의 이야기를 한곳에 모아두는 가족 전용 사진
+            갤러리입니다.
+          </p>
+          <SignInButton mode="modal">
+            <button className="mt-8 rounded-lg bg-stone-950 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800">
+              로그인하고 갤러리 보기
+            </button>
+          </SignInButton>
+        </section>
+      </main>
+    );
   }
 
   return (
-    <GalleryWorkspace
-      key={user.id}
-      storageKey={`family-photos:${user.id}`}
-      userName={user.firstName}
-    />
+    <main className="min-h-[calc(100vh-4rem)] bg-[#f7f4ee] text-stone-950">
+      <GalleryWorkspace
+        key={user.id}
+        storageKey={`family-photos:${user.id}`}
+        userName={user.firstName}
+      />
+    </main>
   );
 }
 
